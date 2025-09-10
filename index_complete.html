@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS Aplikacja z Rasterami i Georeferencją</title>
+    <link rel="stylesheet" href="style_additions.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.33/esri/themes/light/main.css">
+
+    <!-- Additional styles for new features -->
+    <style>
+    /* NEW STYLES FOR RASTER UPLOAD AND GEOREFERENCING */
+
+    /* Divider for upload options */
+    .divider {
+        text-align: center;
+        margin: var(--space-16) 0;
+        position: relative;
+        color: var(--color-text-secondary);
+        font-size: var(--font-size-sm);
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: var(--color-border);
+        z-index: 1;
+    }
+
+    .divider::after {
+        content: 'lub';
+        background-color: var(--color-surface);
+        padding: 0 var(--space-8);
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Georeferencing controls */
+    .georef-controls {
+        margin-top: var(--space-16);
+        padding: var(--space-16);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-base);
+        background-color: var(--color-secondary);
+    }
+
+    .georef-controls h4 {
+        margin: 0 0 var(--space-16) 0;
+        font-size: var(--font-size-lg);
+        color: var(--color-text);
+    }
+
+    .corner-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-12);
+        margin-bottom: var(--space-16);
+    }
+
+    .corner-input {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    .corner-input label {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text);
+    }
+
+    .corner-input input {
+        padding: var(--space-6) var(--space-8);
+        font-size: var(--font-size-sm);
+    }
+
+    /* Google Drive picker styles */
+    #googleDriveBtn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-8);
+    }
+
+    /* Upload panel positioning for multiple panels */
+    #rasterUploadPanel {
+        position: fixed;
+        top: 70px;
+        right: var(--space-16);
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-card-border);
+        border-radius: var(--radius-lg);
+        padding: var(--space-16);
+        box-shadow: var(--shadow-md);
+        z-index: 999;
+        min-width: 350px;
+        max-width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    /* Drive file picker styles */
+    .drive-file-list {
+        max-height: 400px;
+        overflow-y: auto;
+        display: grid;
+        gap: var(--space-8);
+    }
+
+    .drive-file-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-12);
+        padding: var(--space-12);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-base);
+        cursor: pointer;
+        transition: background-color var(--duration-fast);
+    }
+
+    .drive-file-item:hover {
+        background-color: var(--color-secondary);
+    }
+
+    .drive-file-item img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        #rasterUploadPanel {
+            top: 90px;
+            left: var(--space-8);
+            right: var(--space-8);
+            min-width: auto;
+            max-width: none;
+        }
+
+        .corner-inputs {
+            grid-template-columns: 1fr;
+            gap: var(--space-8);
+        }
+    }
+    </style>
+
+    <!-- shpjs library for shapefile parsing -->
+    <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
+    <script src="https://js.arcgis.com/4.33/"></script>
+</head>
+<body>
+    <!-- Toolbar -->
+    <div id="toolbar">
+        <div class="toolbar-content">
+            <h1 class="toolbar-title">📍 GIS Portal z Rasterami i Georeferencją</h1>
+            <div class="toolbar-buttons">
+                <button class="toolbar-btn" id="aboutBtn">ℹ️ O programie</button>
+                <button class="toolbar-btn" id="mapAnalystBtn">📊 MapAnalyst</button>
+                <button class="toolbar-btn" id="georefBtn">🗺️ Georeferencja</button>
+                <button class="toolbar-btn" id="uploadShpBtn">📁 Dodaj SHP</button>
+                <button class="toolbar-btn" id="uploadRasterBtn">🖼️ Dodaj Raster</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Panel for Shapefiles -->
+    <div class="upload-panel hidden" id="uploadPanel">
+        <div class="upload-content">
+            <h3>📁 Dodaj warstwę shapefile</h3>
+            <div class="file-input-container">
+                <input type="file" id="fileInput" accept=".zip" style="display: none;">
+                <label for="fileInput" class="file-label">Wybierz plik ZIP</label>
+                <div id="fileName" class="file-name"></div>
+            </div>
+            <div class="progress-container hidden" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Ładowanie...</div>
+            </div>
+            <button id="addLayerBtn" class="btn btn--secondary" disabled>Dodaj warstwę</button>
+        </div>
+    </div>
+
+    <!-- NEW: Upload Panel for Raster Files -->
+    <div class="upload-panel hidden" id="rasterUploadPanel">
+        <div class="upload-content">
+            <h3>🖼️ Dodaj warstwę rastrową</h3>
+            <div class="file-input-container">
+                <input type="file" id="rasterFileInput" accept=".jpg,.jpeg,.png,.tiff,.tif,.geotiff" style="display: none;">
+                <label for="rasterFileInput" class="file-label">Wybierz obraz</label>
+                <div id="rasterFileName" class="file-name"></div>
+            </div>
+
+            <!-- Google Drive Integration Option -->
+            <div class="divider"></div>
+            <button id="googleDriveBtn" class="btn btn--outline" style="margin-bottom: 16px;">
+                📚 Wybierz z Google Drive
+            </button>
+
+            <!-- Georeferencing controls (shown when file is selected) -->
+            <div class="georef-controls hidden" id="georefControls">
+                <h4>📍 Ustawienia georeferencji</h4>
+                <div class="form-group">
+                    <label class="form-label">Współrzędne narożników (WGS84):</label>
+                    <div class="corner-inputs">
+                        <div class="corner-input">
+                            <label>Północno-zachodnia (NW):</label>
+                            <input type="number" id="nwLng" placeholder="Długość" step="any" class="form-control">
+                            <input type="number" id="nwLat" placeholder="Szerokość" step="any" class="form-control">
+                        </div>
+                        <div class="corner-input">
+                            <label>Północno-wschodnia (NE):</label>
+                            <input type="number" id="neLng" placeholder="Długość" step="any" class="form-control">
+                            <input type="number" id="neLat" placeholder="Szerokość" step="any" class="form-control">
+                        </div>
+                        <div class="corner-input">
+                            <label>Południowo-zachodnia (SW):</label>
+                            <input type="number" id="swLng" placeholder="Długość" step="any" class="form-control">
+                            <input type="number" id="swLat" placeholder="Szerokość" step="any" class="form-control">
+                        </div>
+                        <div class="corner-input">
+                            <label>Południowo-wschodnia (SE):</label>
+                            <input type="number" id="seLng" placeholder="Długość" step="any" class="form-control">
+                            <input type="number" id="seLat" placeholder="Szerokość" step="any" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <button id="autoDetectBtn" class="btn btn--outline" style="margin-bottom: 8px;">
+                    🎯 Wykryj automatycznie z EXIF
+                </button>
+            </div>
+
+            <div class="progress-container hidden" id="rasterProgressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="rasterProgressFill"></div>
+                </div>
+                <div class="progress-text" id="rasterProgressText">Ładowanie...</div>
+            </div>
+            <button id="addRasterLayerBtn" class="btn btn--secondary" disabled>Dodaj warstwę rastrową</button>
+        </div>
+    </div>
+
+    <!-- Map container -->
+    <div id="viewDiv"></div>
+
+    <!-- Splash Screen Modal -->
+    <div class="modal hidden" id="splashScreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📍 O programie GIS Portal</h2>
+                <button class="close-btn" id="closeSplash">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <strong>GIS Portal z Rasterami i Georeferencją</strong> to zaawansowana aplikacja internetowa 
+                    do zarządzania danymi geograficznymi, obsługująca zarówno warstwy wektorowe jak i rastrowe.
+                </p>
+                <p><strong>Nowe funkcjonalności:</strong></p>
+                <ul>
+                    <li>📁 Obsługa plików shapefile (format ZIP)</li>
+                    <li>🖼️ Dodawanie warstw rastrowych (JPG, PNG, TIFF)</li>
+                    <li>📚 Integracja z Google Drive</li>
+                    <li>🗺️ Narzędzia do georeferencji obrazów</li>
+                    <li>🎯 Automatyczne wykrywanie współrzędnych z EXIF</li>
+                    <li>📊 Integracja z MapAnalyst</li>
+                </ul>
+                <p>
+                    Aplikacja wykorzystuje najnowsze technologie ArcGIS JavaScript API 4.33 
+                    oraz MediaLayer do obsługi obrazów rastrowych.
+                </p>
+                <p><strong>Instrukcja użycia:</strong></p>
+                <ol>
+                    <li>Kliknij "Dodaj SHP" aby dodać warstwy wektorowe</li>
+                    <li>Kliknij "Dodaj Raster" aby dodać obrazy rastrowe</li>
+                    <li>Użyj "Georeferencja" aby skorzystać z Map Warper</li>
+                    <li>Wprowadź współrzędne narożników dla georeferencji</li>
+                </ol>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--primary" id="closeSplashBtn">Zamknij</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Georeferencing Help Modal -->
+    <div class="modal hidden" id="georefHelpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🗺️ Pomoc - Georeferencja</h2>
+                <button class="close-btn" id="closeGeorefHelp">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Georeferencja</strong> to proces przypisywania współrzędnych geograficznych do obrazu rastrowego.</p>
+
+                <h4>Opcje georeferencji:</h4>
+                <ul>
+                    <li><strong>Wewnętrzne narzędzie:</strong> Wprowadź współrzędne narożników obrazu ręcznie</li>
+                    <li><strong>Automatyczne EXIF:</strong> Wykryj współrzędne z metadanych obrazu (jeśli dostępne)</li>
+                    <li><strong>Map Warper:</strong> Skorzystaj z zewnętrznego narzędzia do precyzyjnej georeferencji</li>
+                </ul>
+
+                <h4>Jak używać Map Warper:</h4>
+                <ol>
+                    <li>Kliknij przycisk "Georeferencja" w górnym menu</li>
+                    <li>Wybierz "Map Warper" i zostaniesz przekierowany na stronę</li>
+                    <li>Utwórz konto na mapwarper.net</li>
+                    <li>Prześlij swój obraz do Map Warper</li>
+                    <li>Dodaj punkty kontrolne dopasowując obraz do mapy referencyjnej</li>
+                    <li>Eksportuj jako GeoTIFF lub PNG</li>
+                    <li>Wróć do aplikacji i dodaj georeferowany obraz</li>
+                </ol>
+
+                <h4>Współrzędne narożników:</h4>
+                <p>Jeśli znasz współrzędne narożników obrazu, wprowadź je w polach:</p>
+                <ul>
+                    <li><strong>NW:</strong> Północno-zachodni narożnik</li>
+                    <li><strong>NE:</strong> Północno-wschodni narożnik</li>
+                    <li><strong>SW:</strong> Południowo-zachodni narożnik</li>
+                    <li><strong>SE:</strong> Południowo-wschodni narożnik</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--primary" id="closeGeorefHelpBtn">Zamknij</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the updated JavaScript application -->
+    <script src="app_updated.js"></script>
+</body>
+</html>
