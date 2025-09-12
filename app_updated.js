@@ -12,11 +12,13 @@ require([
     "esri/widgets/BasemapToggle",
     "esri/widgets/BasemapGallery",
     "esri/widgets/Legend",
-    "esri/widgets/Expand"
+    "esri/widgets/Expand",
+    "esri/layers/TileLayer",
+    "esri/layers/FeatureLayer",
 ], function(
     Map, MapView, GeoJSONLayer, MediaLayer, ImageElement, 
     ExtentAndRotationGeoreference, CornersGeoreference, Extent, Point,
-    LayerList, BasemapToggle, BasemapGallery, Legend, Expand
+    LayerList, BasemapToggle, BasemapGallery, Legend, Expand, TileLayer, FeatureLayer
 ) {
 
     // Configuration
@@ -38,11 +40,26 @@ require([
         scopes: 'https://www.googleapis.com/auth/drive.readonly'
     };
 
+    //WARSTWY TILE
+
+    const halle_r = new TileLayer({
+        portalItem: {
+          id: "a07ad7f57bf74a14854e628fb724d410"
+        },
+        title: "Nowa warstwa TileLayer"
+      });
+
+    const halle_s = new FeatureLayer({
+        url: "https://services9.arcgis.com/XzFo5ArWiIwKyBgo/arcgis/rest/services/halle_shp/FeatureServer"
+    });    
+
     // Initialize map
     const mapa = new Map({
         basemap: appConfig.basemap
     });
 
+    mapa.add(halle_r);
+    mapa.add(halle_s);
     // Initialize map view
     const widokMapy = new MapView({
         container: "viewDiv",
