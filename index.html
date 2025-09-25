@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GIS Aplikacja z Rasterami i Georeferencją</title>
-    <link rel="stylesheet" href="style_additions.css">
+    <title>Aplikacja przedstawiająca cenzurę kartograficzną</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://js.arcgis.com/4.33/esri/themes/light/main.css">
 
     <!-- Additional styles for new features -->
@@ -159,7 +159,7 @@
     <!-- Toolbar -->
     <div id="toolbar">
         <div class="toolbar-content">
-            <h1 class="toolbar-title">📍 GIS Portal z Rasterami i Georeferencją</h1>
+            <h1 class="toolbar-title">📍 Serwis przedstawiający przykłady cenzury kartograficznej</h1>
             <div class="toolbar-buttons">
                 <button class="toolbar-btn" id="aboutBtn">ℹ️ O programie</button>
                 <button class="toolbar-btn" id="mapAnalystBtn">📊 MapAnalyst</button>
@@ -199,11 +199,8 @@
                 <div id="rasterFileName" class="file-name"></div>
             </div>
 
-            <!-- Google Drive Integration Option -->
-            <div class="divider"></div>
-            <button id="googleDriveBtn" class="btn btn--outline" style="margin-bottom: 16px;">
-                📚 Wybierz z Google Drive
-            </button>
+
+
 
             <!-- Georeferencing controls (shown when file is selected) -->
             <div class="georef-controls hidden" id="georefControls">
@@ -233,9 +230,7 @@
                         </div>
                     </div>
                 </div>
-                <button id="autoDetectBtn" class="btn btn--outline" style="margin-bottom: 8px;">
-                    🎯 Wykryj automatycznie z EXIF
-                </button>
+                
             </div>
 
             <div class="progress-container hidden" id="rasterProgressContainer">
@@ -255,25 +250,25 @@
     <div class="modal hidden" id="splashScreen">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📍 O programie GIS Portal</h2>
+                <h2>📍 O programie</h2>
                 <button class="close-btn" id="closeSplash">&times;</button>
             </div>
             <div class="modal-body">
                 <p>
-                    <strong>GIS Portal z Rasterami i Georeferencją</strong> to zaawansowana aplikacja internetowa 
-                    do zarządzania danymi geograficznymi, obsługująca zarówno warstwy wektorowe jak i rastrowe.
+                    <strong>Aplikacja przedstawiająca cenzurę w kartografii</strong> to serwis zaprojektowany w ramach
+                    pracy magisterskiej pod tytułem Cenzura w kartografii – koncepcja i wykonanie serwisu internetowego przygotowanej pod kierunkiem
+                    dr hab. Beaty Konopskiej przez Pawła Gila. Aplikacja internetowa służy
+                    do zarządzania danymi geograficznymi i obsługuje zarówno warstwy wektorowe jak i rastrowe.
                 </p>
-                <p><strong>Nowe funkcjonalności:</strong></p>
+                <p><strong>Funkcjonalności aplikacji:</strong></p>
                 <ul>
                     <li>📁 Obsługa plików shapefile (format ZIP)</li>
                     <li>🖼️ Dodawanie warstw rastrowych (JPG, PNG, TIFF)</li>
-                    <li>📚 Integracja z Google Drive</li>
                     <li>🗺️ Narzędzia do georeferencji obrazów</li>
-                    <li>🎯 Automatyczne wykrywanie współrzędnych z EXIF</li>
                     <li>📊 Integracja z MapAnalyst</li>
                 </ul>
                 <p>
-                    Aplikacja wykorzystuje najnowsze technologie ArcGIS JavaScript API 4.33 
+                    Aplikacja wykorzystuje  technologie ArcGIS JavaScript API 4.33 
                     oraz MediaLayer do obsługi obrazów rastrowych.
                 </p>
                 <p><strong>Instrukcja użycia:</strong></p>
@@ -303,7 +298,6 @@
                 <h4>Opcje georeferencji:</h4>
                 <ul>
                     <li><strong>Wewnętrzne narzędzie:</strong> Wprowadź współrzędne narożników obrazu ręcznie</li>
-                    <li><strong>Automatyczne EXIF:</strong> Wykryj współrzędne z metadanych obrazu (jeśli dostępne)</li>
                     <li><strong>Map Warper:</strong> Skorzystaj z zewnętrznego narzędzia do precyzyjnej georeferencji</li>
                 </ul>
 
@@ -334,6 +328,6 @@
     </div>
 
     <!-- Load the updated JavaScript application -->
-    <script src="app_updated.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

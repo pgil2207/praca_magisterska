@@ -23,8 +23,8 @@ require([
 
     // Configuration
     const appConfig = {
-        mapCenter: [22.568445, 51.246452],
-        mapZoom: 13.5,
+        mapCenter: [18.587923, 54.39685],
+        mapZoom: 12.5,
         basemap: "streets-vector"
     };
 
@@ -46,20 +46,69 @@ require([
         portalItem: {
           id: "a07ad7f57bf74a14854e628fb724d410"
         },
-        title: "Nowa warstwa TileLayer"
+        title: "Plan miasta Halle"
       });
 
     const halle_s = new FeatureLayer({
-        url: "https://services9.arcgis.com/XzFo5ArWiIwKyBgo/arcgis/rest/services/halle_shp/FeatureServer"
+        url: "https://services9.arcgis.com/XzFo5ArWiIwKyBgo/arcgis/rest/services/halle_shp/FeatureServer",
+        title: "Siatka zniekształceń planu Halle"
     });    
+
+    const kijow_r = new TileLayer({
+        portalItem: {
+          id: "be61b00c00f3483ebc4955225c673254"
+        },
+        title: "Plan Kijowa"
+      });
+
+    const kijow_s = new FeatureLayer({
+        url: "https://services9.arcgis.com/XzFo5ArWiIwKyBgo/arcgis/rest/services/Siatka_zniekszta%C5%82ce%C5%84_planu_Kijowa/FeatureServer",
+        title: "Siatka zniekształceń planu Kijowa"
+    });   
+
+    const gdansk_r = new TileLayer({
+        portalItem: {
+          id: "312a4b1cf8d644fca48e3bea0024561b"
+        },
+        title: "Plan Gdańska Wrzeszcz-Oliwa"
+      });
+
+    const gdansk_s = new FeatureLayer({
+        url: "https://services9.arcgis.com/XzFo5ArWiIwKyBgo/arcgis/rest/services/Siatka_zniekszta%C5%82ce%C5%84_planu_Gda%C5%84ska/FeatureServer",
+        title: "Siatka zniekształceń Gdańska Wrzeszcz-Oliwa"
+    });   
+
+    const lenin_r = new TileLayer({
+        portalItem: {
+          id: "a598121ae3604724ae9c35d458c69203"
+        },
+        title: "Plan Leningradu (Petersburga)"
+      });
+
+    const lenin_s = new FeatureLayer({
+        url: "https://services9.arcgis.com/XzFo5ArWiIwKyBgo/arcgis/rest/services/Siatka_zniekszta%C5%82ce%C5%84_planu_Leningradu/FeatureServer",
+        title: "Siatka zniekształceń Leningradu (Petersburga)"
+    });   
+
+    const sa_r = new TileLayer({
+        portalItem: {
+          id: "e61177a80da844949b8456c67ea253df"
+        },
+        title: "Mapa San Francisco i okolic"
+      });
+
+    const sa_s = new FeatureLayer({
+        url: "https://services9.arcgis.com/XzFo5ArWiIwKyBgo/arcgis/rest/services/Siatka_zniekszta%C5%82ce%C5%84_mapy_San_Francisco_i_okolic/FeatureServer",
+        title: "Siatka zniekształceń mapy San Francisco i okolic"
+    });   
+  
 
     // Initialize map
     const mapa = new Map({
         basemap: appConfig.basemap
     });
 
-    mapa.add(halle_r);
-    mapa.add(halle_s);
+
     // Initialize map view
     const widokMapy = new MapView({
         container: "viewDiv",
@@ -134,6 +183,16 @@ require([
         widokMapy.ui.add(przelacznikMapy, "bottom-right");
         widokMapy.ui.add(expandGaleriaMap, "top-right");
         widokMapy.ui.add(expandLegenda, "top-right");
+        mapa.add(halle_r);
+        mapa.add(halle_s);
+        mapa.add(kijow_r);
+        mapa.add(kijow_s);
+        mapa.add(gdansk_r);
+        mapa.add(gdansk_s);
+        mapa.add(lenin_r);
+        mapa.add(lenin_s);
+        mapa.add(sa_r);
+        mapa.add(sa_s);
     }
 
     /**
@@ -177,14 +236,14 @@ require([
             przyciskGeoref.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                // Show options: internal tool or Map Warper  
+                
                 const options = confirm('Wybierz narzędzie georeferencji:\n\nOK - Map Warper (zewnętrzne)\nAnuluj - Pomoc do wewnętrznego narzędzia');
                 if (options) {
-                    // Open Map Warper
+                    
                     window.open('https://mapwarper.net', '_blank', 'noopener,noreferrer');
                     pokazPowiadomienie('Otwieranie Map Warper - narzędzia do georeferencji');
                 } else {
-                    // Show help modal
+                    
                     const helpModal = document.getElementById('georefHelpModal');
                     if (helpModal) {
                         helpModal.classList.remove('hidden');
@@ -1032,7 +1091,7 @@ require([
     }
 
     // Initialize application
-    console.log('GIS Aplikacja z rasterami i georeferencją została zainicjalizowana.');
+    console.log('Aplikacja została zainicjalizowana.');
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
